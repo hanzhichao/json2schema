@@ -1,54 +1,100 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# @FileName     :   json2schema.py
+# @Author       :   superhin
+# @CreateTime   :   2022/3/28 12:21
+# @Function     :
+import json
+import os
+from pprint import pprint
+from typing import Union
+
+
 class JSON2Schema(object):
-    def __init__(self, data: dict):
-        self._data = data
+    def __init__(self, data: Union[str, dict, list], required_all=True, check_value=False):
+        assert isinstance(data, str) or isinstance(data, dict) or isinstance(data, list), 'data仅支持str、dict、list'
+        if isinstance(data, str):
+            self._data = json.loads(data)
+        else:
+            self._data = data
+        
+        self.required_all = required_all
+        self.check_value = check_value
 
     def _handle_null(self, data: None):
-        return {'type': 'null'}
+        schema = {'type': 'null'}
+        if self.check_value is True:
+            schema['pattern'] = '^null$'
+        return schema
 
     def _handle_boolean(self, data: bool):
-        return {'type': 'boolean'}
+        schema = {'type': 'boolean'}
+        if self.check_value is True:
+            schema['pattern'] = '^%s$' % data
+        return schema
 
     def _handle_number(self, data: float):
-        return {'type': 'number'}
+        schema = {'type': 'number'}
+        if self.check_value is True:
+            schema['pattern'] = '^%s$' % data
+        return schema
 
     def _handle_integer(self, data: int):
-        return {'type': 'integer'}
+        schema = {'type': 'integer'}
+
+        if self.check_value is True:
+            schema['pattern'] = '^%s$' % data
+        return schema
 
     def _handle_string(self, data: str):
-        return {'type': 'string', 'pattern': data}
-
-    def _handel_object(self, data: dict):
-        """处理object类型节点"""
-        schema = {"type": "object"}
-        schema['properties'] = {key: self._handle_item(value) for key, value in data.items()}  # todo
+        schema = {'type': 'string'}
+        if self.check_value is True:
+            schema['pattern'] = '^%s$' % data
         return schema
 
-    def _handel_array(self, data: list):
+    def _handle_object(self, data: dict):
         """处理object类型节点"""
-        schema = {"type": "array"}
-        schema['items'] = [self._handle_item(item) for item in data[:1]]  # todo 严格模式
+        if not data:
+            return {"type": "object"}
+        schema = {"type": "object", 'properties': {key: self._handle_item(value) for key, value in data.items()}}
+        if self.required_all:
+            schema['required'] = list(data.keys())
         return schema
 
-    def _handle_item(self, data):
+    def _handle_array(self, data: list):
+        """处理object类型节点"""
+        if not data:
+            return {"type": "array"}
+        schema = {"type": "array", 'items': [self._handle_item(item) for item in data[:1]]}
+        return schema
+
+    def _handle_item(self, data: Union[dict, list, int, float, bool, type(None)]):
         type_map = {
             int: self._handle_integer,
             float: self._handle_number,
             str: self._handle_string,
-            list: self._handel_array,
-            dict: self._handel_object,
+            list: self._handle_array,
+            dict: self._handle_object,
             bool: self._handle_boolean,
             type(None): self._handle_null,
         }
         _handle_func = type_map.get(type(data))
         return _handle_func(data) if _handle_func else data
 
-    def to_schema(self):
+    def to_schema(self, title=None, description=None)->str:
         if not isinstance(self._data, (list, dict)):
-            return {}
+            return "{}"
 
-        schema = {"$schema": "http://json-schema.org/draft-04/schema#"}
+        schema = {
+            "$schema": "http://json-schema.org/draft-04/schema#"
+        }
+        if isinstance(title, str):
+            schema['title'] = title
+        if isinstance(description, str):
+            schema['description'] = description
+            
         schema.update(self._handle_item(self._data))
-        return schema
+        return json.dumps(schema, ensure_ascii=False)
 
 
 class JSONSchema2List(object):
@@ -89,3 +135,19 @@ def schema2list(data: dict, name=None, parent_data=None):
             item_data['children'] = schema2list(value, name=name, parent_data=data)
         result.append(item_data)
     return result
+
+
+if __name__ == '__main__':
+    path = '/Users/superhin/Projects/chainmaker-sdk-python/tests/schemas/objects'
+    for file in os.listdir(path):
+        with open(os.path.join(path, file)) as f:
+            data = json.load(f)
+            print(data)
+            schema = JSON2Schema(data).to_schema(title='TransactionInfo', description='交易信息')
+        base_name = os.path.basename(file).strip('.json')
+        output_file_name = f'{base_name}Schema.json'
+        with open(os.path.join(os.path.dirname(path), 'schemas', output_file_name), 'w') as f:
+            f.write(schema)
+    # pprint(schema)
+    # schema = json.dumps(schema, indent=2, ensure_ascii=False)
+    # print(schema)
