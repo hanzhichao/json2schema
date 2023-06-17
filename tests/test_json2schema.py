@@ -1,4 +1,8 @@
-from json2schema import JSON2Schema, schema2list
+from pprint import pprint
+
+from jsonschema import validate
+
+from json2schema import json2schema, schema2list
 
 
 def test_json2schema():
@@ -24,8 +28,25 @@ def test_json2schema():
         "abc": None
     }
 
-    r = JSON2Schema(data).to_schema()
-    print(r)
+    schema = json2schema(data)
+    print(schema)
+    validate(data, schema=schema)
+
+
+def test_json2schema2():
+    data = {
+        "first_name": "George",
+        "last_name": "Washington",
+        "birthday": "1732-02-22",
+        "address": {
+            "street_address": "3200 Mount Vernon Memorial Highway",
+            "city": "Mount Vernon",
+            "state": "Virginia",
+            "country": "United States"
+        }
+    }
+    schema = json2schema(data, check_value=True)
+    pprint(schema)
 
 
 def test_schema2list():
@@ -57,5 +78,5 @@ def test_schema2list():
         },
         "required": ['historical']
     }
-    r = schema2list(r)
-    print(r)
+    schema = schema2list(r)
+    print(schema)
