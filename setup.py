@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 this_directory = os.path.abspath(os.path.dirname(__file__))
 
-version = '0.1.0'
+version = '0.1.1'
 setup_requirements = []
 install_requires = []
 tests_require = ['jsonschema', 'pytest']
@@ -27,7 +27,7 @@ setup(
     author_email='superhin@126.com',
     description='JSON to JSONSchema',
     license="MIT license",
-    long_description=read_file('tests/README.md'),
+    long_description=read_file('README.md'),
     long_description_content_type="text/markdown",  # 新参数
     url='https://github.com/hanzhichao/json2schema',
     keywords=['json2schema', 'jsonschema', 'json to jsonschema'],
