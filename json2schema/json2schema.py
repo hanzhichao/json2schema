@@ -91,7 +91,7 @@ class JSON2Schema(object):
         return schema
 
 
-def json2schema(data: Union[dict, list], required_all=True, check_value=False) -> Union[dict, list]:
+def json2schema(data: Union[dict, list], required_all=False, check_value=False) -> Union[dict, list]:
     """
     change json to jsonschema
     :param data: the json data (as dict or list)

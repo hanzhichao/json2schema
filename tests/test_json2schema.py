@@ -45,7 +45,7 @@ def test_json2schema2():
             "country": "United States"
         }
     }
-    schema = json2schema(data, check_value=True)
+    schema = json2schema(data)
     pprint(schema)
 
 
