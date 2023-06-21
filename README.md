@@ -2,6 +2,15 @@
 
 Get (Guess) jsonschema from one json sample
 
+![example workflow](https://github.com/hanzhichao/json2schema/actions/workflows/python-app.yml/badge.svg)
+[![](https://travis-ci.org/hanzhichao/json2schema.svg?branch=main)](https://travis-ci.org/hanzhichao/json2schema)
+![](https://img.shields.io/badge/language-python-blue.svg)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/json2schema)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/json2schema)
+![PyPI - License](https://img.shields.io/pypi/l/json2schema)
+
+
+
 ## Features
 
 - json to jsonschema
